@@ -6,9 +6,7 @@ import (
 )
 
 type UserAPIInterface interface {
-	GetUsers() ([]models.User, error)
 	GetUserById(id int) (models.User, error)
-	GetUsersWithAddress() ([]models.User, error)
 	GetUserAddressById(id int) (models.Addresses, error)
 }
 

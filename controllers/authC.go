@@ -64,8 +64,38 @@ func (c *JWTConfig) GenerateToken(claim *MyClaims) (string, error) {
 	return tokenString, nil
 }
 
+func (c *JWTConfig) GetClaimsFromToken(tokenString string) (*MyClaims, error) {
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+		return []byte(c.JwtSecret), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, fmt.Errorf("failed to casting token claims")
+	}
+
+	fmt.Println(claims)
+
+	cl := new(MyClaims)
+	cl.Email = claims["email"].(string)
+	cl.Id = int(claims["id"].(float64))
+	cl.Role = int(claims["role"].(float64))
+
+	return cl, nil
+}
+
 func (c *JWTConfig) VerifyToken(tokenString string) error {
-	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) { return []byte(c.JwtSecret), nil })
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+		return []byte(c.JwtSecret), nil
+	})
 
 	if err != nil {
 		return err

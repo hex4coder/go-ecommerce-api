@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -75,38 +74,16 @@ func (app *App) RegisterRoutes() {
 		APISuccessResponse(http.StatusOK, "logout", nil, c)
 	})
 
-	// get list of users
-	ar.GET("/users", func(c *gin.Context) {
-		users, err := app.user.GetUsers()
-		if err != nil {
-			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
-			return
-		}
-
-		APISuccessResponse(http.StatusOK, "list of users", users, c)
-	})
-
-	//  list of users with address
-	ar.GET("/users-with-address", func(c *gin.Context) {
-		users, err := app.user.GetUsersWithAddress()
-		if err != nil {
-			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
-			return
-		}
-
-		APISuccessResponse(http.StatusOK, "list of users with address", users, c)
-	})
-
 	// get user by id
-	ar.GET("/user/:id", func(c *gin.Context) {
-		idStr := c.Param("id")
-		id, err := strconv.Atoi(idStr)
-
-		if err != nil {
-			APIErrorResponse(http.StatusInternalServerError, fmt.Sprintf("failed to convert id params %v", idStr), c)
+	ar.GET("/user", func(c *gin.Context) {
+		claims, e := c.Get("claims")
+		if !e {
+			APIErrorResponse(http.StatusInternalServerError, "failed to set context with claims", c)
 			return
 		}
+		cl := claims.(*controllers.MyClaims)
 
+		id := cl.Id
 		user, err := app.user.GetUserById(id)
 		if err != nil {
 			APIErrorResponse(http.StatusInternalServerError, fmt.Sprintf("failed to get user with %d error: %s", id, err.Error()), c)
@@ -114,17 +91,19 @@ func (app *App) RegisterRoutes() {
 		}
 
 		APISuccessResponse(http.StatusOK, fmt.Sprintf("user with id %d", id), user, c)
+
 	})
 
 	// get users address with id
-	ar.GET("/user-address/:id", func(c *gin.Context) {
-		idStr := c.Param("id")
-		id, err := strconv.Atoi(idStr)
-
-		if err != nil {
-			APIErrorResponse(http.StatusInternalServerError, fmt.Sprintf("failed to convert id params %v", idStr), c)
+	ar.GET("/user-address", func(c *gin.Context) {
+		claims, e := c.Get("claims")
+		if !e {
+			APIErrorResponse(http.StatusInternalServerError, "failed to set context with claims", c)
 			return
 		}
+
+		cl := claims.(*controllers.MyClaims)
+		id := cl.Id
 
 		address, err := app.user.GetUserAddressById(id)
 		if err != nil {

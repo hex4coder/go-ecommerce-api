@@ -1,5 +1,13 @@
 package models
 
+import "time"
+
+type SoftDeleteTime struct {
+	DeletedAt time.Time `json:"deleted_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+}
+
 type User struct {
 	Id       int       `json:"id" gorm:"primary_key"`
 	Name     string    `json:"name"`
@@ -7,6 +15,7 @@ type User struct {
 	Role     int       `json:"role"`
 	Password string    `json:"password"`
 	Address  Addresses `json:"address,omitempty" gorm:"foreignKey:user_id;references:id"`
+	SoftDeleteTime
 }
 
 type Addresses struct {
@@ -20,4 +29,5 @@ type Addresses struct {
 	Dusun     string `json:"dusun,omitempty"`
 	Jalan     string `json:"jalan,omitempty"`
 	KodePos   string `json:"kodepos,omitempty"`
+	// SoftDeleteTime
 }

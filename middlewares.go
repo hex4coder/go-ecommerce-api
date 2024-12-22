@@ -1,49 +1,42 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
+func GetTokenFromCookiesOrBearer(c *gin.Context) (string, error) {
+	c.Header("Content-Type", "application/json")
 
+	token := ""
+
+	// get cookie from request
+	cookie, err := c.Cookie("jwt")
+	if err == http.ErrNoCookie {
+		// no cookie, perform header bearer token authorization
+		// get headers bearer token
+		tokenString := c.GetHeader("Authorization")
+
+		// get the token from the string Authorization: Bearer .....token.....
+		token = tokenString[len("Bearer:"):]
+	} else {
+		// set token to cookie
+		token = cookie
+	}
+
+	if token == "" {
+		return "", fmt.Errorf("token empty")
+	}
+
+	return token, nil
+}
 
 func AuthMiddleware(app *App) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Header("Content-Type", "application/json")
+		token, err := GetTokenFromCookiesOrBearer(c)
 
-		token := ""
-
-		// get cookie from request
-		cookie, err := c.Cookie("jwt")
-		if err == http.ErrNoCookie {
-			// no cookie, perform header bearer token authorization
-			// get headers bearer token
-			tokenString := c.GetHeader("Authorization")
-			if tokenString == "" {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]any{
-					"status":  "error",
-					"message": "token empty",
-				})
-				return
-			}
-
-			// get the token from the string Authorization: Bearer .....token.....
-			token = tokenString[len("Bearer:"):]
-		} else {
-			// set token to cookie
-			token = cookie
-		}
-
-		if token == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]any{
-				"status":  "error",
-				"message": "token empty",
-			})
-			return
-		}
-
-		err = app.auth.GetJWTConfig().VerifyToken(token)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]any{
 				"status":  "error",
@@ -51,6 +44,17 @@ func AuthMiddleware(app *App) gin.HandlerFunc {
 			})
 			return
 		}
+
+		cl, err := app.auth.GetJWTConfig().GetClaimsFromToken(token)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]any{
+				"status":  "error",
+				"message": err.Error(),
+			})
+			return
+		}
+
+		c.Set("claims", cl)
 
 		c.Next()
 	}
