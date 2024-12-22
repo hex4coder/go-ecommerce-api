@@ -53,7 +53,7 @@ func (app *App) RegisterRoutes() {
 		}
 
 		// set cookie
-		c.SetCookie("jwt", jwt, int(time.Now().Add(app.auth.GetJWTConfig().ExpiredDuration).Unix()), "/", "*", true, true)
+		c.SetCookie("jwt", jwt, int(time.Now().Add(app.auth.GetJWTConfig().ExpiredDuration).Unix()), "/", app.url, true, true)
 
 		// jwt account
 		APISuccessResponse(http.StatusOK, "login function", map[string]any{
@@ -66,7 +66,7 @@ func (app *App) RegisterRoutes() {
 
 	ar := app.router.Group("/", AuthMiddleware(app))
 	ar.POST("/logout", func(c *gin.Context) {
-		c.SetCookie("jwt", "", 0, "/", "*", true, true)
+		c.SetCookie("jwt", "", 0, "/", app.url, true, true)
 		err := app.auth.Logout()
 		if err != nil {
 			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)

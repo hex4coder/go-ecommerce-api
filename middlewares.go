@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// type AuthMidlleware struct{}
+
 
 func AuthMiddleware(app *App) gin.HandlerFunc {
 	return func(c *gin.Context) {

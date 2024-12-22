@@ -17,14 +17,16 @@ type App struct {
 	user   UserAPIInterface
 	router *gin.Engine
 	db     *gorm.DB
+	url    string
 }
 
-func NewApp(db *gorm.DB) *App {
+func NewApp(db *gorm.DB, url string) *App {
 	return &App{
 		db:     db,
 		auth:   controllers.NewAuthAPI(db),
 		user:   controllers.NewUserAPI(db),
 		router: gin.Default(),
+		url:    url,
 	}
 }
 
@@ -41,6 +43,9 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
+	// app name
+	appUrl := os.Getenv("APP_NAME")
+
 	// release gin
 	gmode := os.Getenv("GIN_MODE")
 	gin.SetMode(gmode)
@@ -52,7 +57,7 @@ func main() {
 	}
 
 	// buat app
-	app := NewApp(db)
+	app := NewApp(db, appUrl)
 
 	// register routes
 	app.RegisterRoutes()
