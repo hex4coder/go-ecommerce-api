@@ -21,13 +21,9 @@ type App struct {
 
 func NewApp(db *gorm.DB) *App {
 	return &App{
-		db: db,
-		auth: &controllers.AuthAPI{
-			DB: db,
-		},
-		user: &controllers.UserAPI{
-			DB: db,
-		},
+		db:     db,
+		auth:   controllers.NewAuthAPI(db),
+		user:   controllers.NewUserAPI(db),
 		router: gin.Default(),
 	}
 }

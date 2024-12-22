@@ -11,6 +11,12 @@ type UserAPI struct {
 	DB *gorm.DB
 }
 
+func NewUserAPI(db *gorm.DB) *UserAPI {
+	return &UserAPI{
+		DB: db,
+	}
+}
+
 func (u *UserAPI) GetUsers() ([]models.User, error) {
 	var users []models.User
 
