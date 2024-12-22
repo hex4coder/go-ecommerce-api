@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hex4coder/go-ecommerce-api/controllers"
@@ -51,18 +52,31 @@ func (app *App) RegisterRoutes() {
 			return
 		}
 
+		// set cookie
+		c.SetCookie("jwt", jwt, int(time.Now().Add(app.auth.GetJWTConfig().ExpiredDuration).Unix()), "/", "*", true, true)
+
 		// jwt account
 		APISuccessResponse(http.StatusOK, "login function", map[string]any{
 			"jwt": jwt,
 		}, c)
 	})
 	app.router.POST("/register", func(c *gin.Context) {})
-	app.router.POST("/logout", func(c *gin.Context) {})
 
 	// ---------------------------------USERS-------------------------------
 
+	ar := app.router.Group("/", AuthMiddleware(app))
+	ar.POST("/logout", func(c *gin.Context) {
+		c.SetCookie("jwt", "", 0, "/", "*", true, true)
+		err := app.auth.Logout()
+		if err != nil {
+			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			return
+		}
+		APISuccessResponse(http.StatusOK, "logout", nil, c)
+	})
+
 	// get list of users
-	app.router.GET("/users", func(c *gin.Context) {
+	ar.GET("/users", func(c *gin.Context) {
 		users, err := app.user.GetUsers()
 		if err != nil {
 			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
@@ -73,7 +87,7 @@ func (app *App) RegisterRoutes() {
 	})
 
 	//  list of users with address
-	app.router.GET("/users-with-address", func(c *gin.Context) {
+	ar.GET("/users-with-address", func(c *gin.Context) {
 		users, err := app.user.GetUsersWithAddress()
 		if err != nil {
 			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
@@ -84,7 +98,7 @@ func (app *App) RegisterRoutes() {
 	})
 
 	// get user by id
-	app.router.GET("/user/:id", func(c *gin.Context) {
+	ar.GET("/user/:id", func(c *gin.Context) {
 		idStr := c.Param("id")
 		id, err := strconv.Atoi(idStr)
 
@@ -103,7 +117,7 @@ func (app *App) RegisterRoutes() {
 	})
 
 	// get users address with id
-	app.router.GET("/user-address/:id", func(c *gin.Context) {
+	ar.GET("/user-address/:id", func(c *gin.Context) {
 		idStr := c.Param("id")
 		id, err := strconv.Atoi(idStr)
 

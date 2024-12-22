@@ -65,7 +65,7 @@ func (c *JWTConfig) GenerateToken(claim *MyClaims) (string, error) {
 }
 
 func (c *JWTConfig) VerifyToken(tokenString string) error {
-	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) { return c.JwtSecret, nil })
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) { return []byte(c.JwtSecret), nil })
 
 	if err != nil {
 		return err
@@ -97,6 +97,10 @@ func NewAuthAPI(db *gorm.DB) *AuthAPI {
 		DB:  db,
 		JWT: jwtconfig,
 	}
+}
+
+func (a *AuthAPI) GetJWTConfig() *JWTConfig {
+	return a.JWT
 }
 
 func (a *AuthAPI) Login(r *LoginRequest) (string, error) {

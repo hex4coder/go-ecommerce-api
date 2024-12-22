@@ -18,4 +18,5 @@ type AuthInterface interface {
 	Logout() error
 	HashPassword(string) (string, error)
 	CheckPassword(string, string) bool
+	GetJWTConfig() *controllers.JWTConfig
 }
