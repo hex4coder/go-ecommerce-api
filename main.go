@@ -13,8 +13,14 @@ import (
 )
 
 type App struct {
-	auth   AuthInterface
-	user   UserAPIInterface
+	// controllers
+	auth     AuthInterface
+	user     UserInterface
+	kategori KategoriInterface
+	brand    BrandInterface
+	product  ProductInterface
+
+	// app base
 	router *gin.Engine
 	db     *gorm.DB
 	url    string
@@ -22,9 +28,13 @@ type App struct {
 
 func NewApp(db *gorm.DB, url string) *App {
 	return &App{
+		auth:     controllers.NewAuthAPI(db),
+		user:     controllers.NewUserAPI(db),
+		kategori: controllers.NewKategoriAPI(db),
+		brand:    controllers.NewBrandAPI(db),
+		product:  controllers.NewProductAPI(db),
+
 		db:     db,
-		auth:   controllers.NewAuthAPI(db),
-		user:   controllers.NewUserAPI(db),
 		router: gin.Default(),
 		url:    url,
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -112,5 +113,171 @@ func (app *App) RegisterRoutes() {
 		}
 
 		APISuccessResponse(http.StatusOK, fmt.Sprintf("address with user id %d", id), address, c)
+	})
+
+	// ambil list kategori
+	ar.GET("/kategori", func(c *gin.Context) {
+		data, err := app.kategori.GetAll()
+
+		if err != nil {
+			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			return
+		}
+
+		APISuccessResponse(http.StatusOK, "list kategori", data, c)
+	})
+
+	// ambil list brand
+	ar.GET("/brand", func(c *gin.Context) {
+		data, err := app.brand.GetAll()
+
+		if err != nil {
+			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			return
+		}
+
+		APISuccessResponse(http.StatusOK, "list brand", data, c)
+	})
+
+	// ambil list produk berdasarkan waktu terbaru
+	ar.GET("/products", func(c *gin.Context) {
+		data, err := app.product.GetAllProducts()
+
+		if err != nil {
+			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			return
+		}
+
+		APISuccessResponse(http.StatusOK, "list of products", data, c)
+	})
+
+	// get detail product by id
+	ar.GET("/product/:id", func(c *gin.Context) {
+		ar.GET("/kategori/:id", func(c *gin.Context) {
+			idStr := c.Param("id")
+			if idStr == "" {
+				APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("invalid product_id given %s", idStr), c)
+				return
+			}
+
+			// convert string to int
+			id, err := strconv.Atoi(idStr)
+			if err != nil {
+				APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("error conver id %s => %v", idStr, err), c)
+				return
+			}
+
+			// find products by categori id
+			data, err := app.product.GetDetailProduct(id)
+
+			if err != nil {
+				APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+				return
+			}
+
+			APISuccessResponse(http.StatusOK, "list of products", data, c)
+		})
+	})
+
+	// ambil list product berdasarkan merek
+	ar.GET("/kategori/:id", func(c *gin.Context) {
+		idStr := c.Param("id")
+		if idStr == "" {
+			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("invalid kategori_id given %s", idStr), c)
+			return
+		}
+
+		// convert string to int
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("error conver id %s => %v", idStr, err), c)
+			return
+		}
+
+		// find products by categori id
+		data, err := app.product.GetProductsByCategoryID(id)
+
+		if err != nil {
+			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			return
+		}
+
+		APISuccessResponse(http.StatusOK, "list of products", data, c)
+	})
+
+	// ambil list products berdasarkan brand id
+	ar.GET("/brand/:id", func(c *gin.Context) {
+		idStr := c.Param("id")
+		if idStr == "" {
+			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("invalid brand_id given %s", idStr), c)
+			return
+		}
+
+		// convert string to int
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("error conver id %s => %v", idStr, err), c)
+			return
+		}
+
+		// find products by categori id
+		data, err := app.product.GetProductsByBrandID(id)
+
+		if err != nil {
+			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			return
+		}
+
+		APISuccessResponse(http.StatusOK, "list of products", data, c)
+	})
+
+	// ambil list foto dari produk
+	ar.GET("/photos/:id", func(c *gin.Context) {
+		idStr := c.Param("id")
+		if idStr == "" {
+			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("invalid produk_id given %s", idStr), c)
+			return
+		}
+
+		// convert string to int
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("error conver id %s => %v", idStr, err), c)
+			return
+		}
+
+		data, err := app.product.GetProductPhotosByID(id)
+
+		if err != nil {
+			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			return
+		}
+
+		APISuccessResponse(http.StatusOK, "list of photo products", data, c)
+	})
+
+	// ambil list ukuran dari produk
+	ar.GET("/ukuran/:id", func(c *gin.Context) {
+		idStr := c.Param("id")
+		if idStr == "" {
+			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("invalid produk_id given %s", idStr), c)
+			return
+		}
+
+		// convert string to int
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("error conver id %s => %v", idStr, err), c)
+			return
+		}
+
+		data, err := app.product.GetUkuranProdukByID(id)
+
+		if err != nil {
+			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			return
+		}
+
+		APISuccessResponse(http.StatusOK, "list of photo products", data, c)
 	})
 }

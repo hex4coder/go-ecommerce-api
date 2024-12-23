@@ -20,7 +20,9 @@ func GetTokenFromCookiesOrBearer(c *gin.Context) (string, error) {
 		tokenString := c.GetHeader("Authorization")
 
 		// get the token from the string Authorization: Bearer .....token.....
-		token = tokenString[len("Bearer:"):]
+		if token != "" {
+			token = tokenString[len("Bearer:"):]
+		}
 	} else {
 		// set token to cookie
 		token = cookie
