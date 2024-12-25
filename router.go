@@ -29,7 +29,14 @@ func (app *App) RegisterRoutes() {
 	// custom validators
 	cv := NewCustomValidator()
 
-	// ---------------------------------AUTH API-----------------------------
+	// ---------------------------------AUTH API------------------------------------------------
+	app.router.GET("/", func(c *gin.Context) {
+		APISuccessResponse(http.StatusOK, "we are online and ready", map[string]any{
+			"programmed_by": "Ardan, S.Kom",
+			"design_by":     "Ardan, S.Kom",
+		}, c)
+	})
+
 	app.router.POST("/login", func(c *gin.Context) {
 		loginReq := new(controllers.LoginRequest)
 

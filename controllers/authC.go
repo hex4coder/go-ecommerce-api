@@ -82,8 +82,6 @@ func (c *JWTConfig) GetClaimsFromToken(tokenString string) (*MyClaims, error) {
 		return nil, fmt.Errorf("failed to casting token claims")
 	}
 
-	fmt.Println(claims)
-
 	cl := new(MyClaims)
 	cl.Email = claims["email"].(string)
 	cl.Id = int(claims["id"].(float64))

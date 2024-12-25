@@ -36,3 +36,7 @@ type ProductInterface interface {
 	GetProductPhotosByID(int) ([]*models.PhotoProducts, error)
 	GetUkuranProdukByID(int) ([]*models.UkuranProduks, error)
 }
+
+type OrderInterface interface {
+	GetMyOrders(int) ([]*models.Order, error)
+}
