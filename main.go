@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hex4coder/go-ecommerce-api/controllers"
@@ -26,7 +27,7 @@ type App struct {
 	url    string
 }
 
-func NewApp(db *gorm.DB, url string) *App {
+func NewApp(db *gorm.DB, url string, router *gin.Engine) *App {
 	return &App{
 		auth:     controllers.NewAuthAPI(db),
 		user:     controllers.NewUserAPI(db),
@@ -35,14 +36,19 @@ func NewApp(db *gorm.DB, url string) *App {
 		product:  controllers.NewProductAPI(db),
 
 		db:     db,
-		router: gin.Default(),
+		router: router,
 		url:    url,
 	}
 }
 
 func (app *App) Run() {
 	port := 3000
-	app.router.Run(fmt.Sprintf(":%d", port))
+	log.Printf("%s - [STARTED] - Server started at port %d\n", time.Now(), port)
+
+	err := app.router.Run(fmt.Sprintf(":%d", port))
+	if err != nil {
+		log.Fatalf("Failed start server : %v", err)
+	}
 }
 
 func main() {
@@ -60,6 +66,10 @@ func main() {
 	gmode := os.Getenv("GIN_MODE")
 	gin.SetMode(gmode)
 
+	// build router using logger middleware
+	router := gin.Default()
+	router.Use(gin.Logger())
+
 	// buat koneksi
 	db, err := models.ConnectDB()
 	if err != nil {
@@ -67,7 +77,7 @@ func main() {
 	}
 
 	// buat app
-	app := NewApp(db, appUrl)
+	app := NewApp(db, appUrl, router)
 
 	// register routes
 	app.RegisterRoutes()
