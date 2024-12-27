@@ -72,7 +72,7 @@ func (app *App) RegisterRoutes() {
 	app.router.POST("/register", func(c *gin.Context) {})
 
 	// ambil list kategori
-	app.router.GET("/kategori", func(c *gin.Context) {
+	app.router.GET("/categories", func(c *gin.Context) {
 		data, err := app.kategori.GetAll()
 
 		if err != nil {
@@ -84,7 +84,7 @@ func (app *App) RegisterRoutes() {
 	})
 
 	// ambil list brand
-	app.router.GET("/brand", func(c *gin.Context) {
+	app.router.GET("/brands", func(c *gin.Context) {
 		data, err := app.brand.GetAll()
 
 		if err != nil {
