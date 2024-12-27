@@ -235,6 +235,32 @@ func (app *App) RegisterRoutes() {
 		APISuccessResponse(http.StatusOK, "list of photo products", data, c)
 	})
 
+	// get popular products
+	app.router.GET("/popular-products/:limit", func(c *gin.Context) {
+		limitStr := c.Param("limit")
+		if limitStr == "" {
+			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("invalid limit given %s", limitStr), c)
+			return
+		}
+
+		// convert string to int
+		limit, err := strconv.Atoi(limitStr)
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("error conver limit %s => %v", limitStr, err), c)
+			return
+		}
+
+		// find products by categori id
+		data, err := app.product.GetPopularProducts(limit)
+
+		if err != nil {
+			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			return
+		}
+
+		APISuccessResponse(http.StatusOK, "list of popular products", data, c)
+	})
+
 	// ---------------------------------USERS-------------------------------
 
 	ar := app.router.Group("/", AuthMiddleware(app))

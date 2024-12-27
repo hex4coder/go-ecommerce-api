@@ -136,3 +136,21 @@ func (p *ProductAPI) GetUkuranProdukByID(productID int) ([]*models.UkuranProduks
 
 	return data, nil
 }
+func (p *ProductAPI) GetPopularProducts(limit int) ([]*models.Product, error) {
+	data := []*models.Product{}
+
+	var r *gorm.DB
+
+	if limit > 0 {
+		// urutkan berdasarkan waktu
+		r = p.DB.Table("produk").Where("is_popular = ?", true).Order("created_at desc").Limit(limit).Find(&data)
+	} else {
+		r = p.DB.Table("produk").Where("is_popular = ?", true).Order("created_at desc").Find(&data)
+	}
+
+	if r.Error != nil {
+		return nil, r.Error
+	}
+
+	return data, nil
+}
