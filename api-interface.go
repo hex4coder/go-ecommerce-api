@@ -21,10 +21,12 @@ type AuthInterface interface {
 
 type KategoriInterface interface {
 	GetAll() ([]*models.Kategori, error)
+	GetById(int) (*models.Kategori, error)
 }
 
 type BrandInterface interface {
 	GetAll() ([]*models.Brand, error)
+	GetById(int) (*models.Brand, error)
 }
 
 type ProductInterface interface {

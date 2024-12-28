@@ -122,15 +122,41 @@ func (app *App) RegisterRoutes() {
 			return
 		}
 
-		// find products by categori id
-		data, err := app.product.GetDetailProduct(id)
+		// buat temporary data
+		data := make(map[string]any)
 
+		// find products by categori id
+		product, err := app.product.GetDetailProduct(id)
 		if err != nil {
 			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
 			return
 		}
 
-		APISuccessResponse(http.StatusOK, "list of products", data, c)
+		// assign product to data
+		data["product"] = product
+
+		// cari brand dari product tersebut
+		brand, err := app.brand.GetById(product.BrandID)
+		if err != nil {
+			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			return
+		}
+
+		// assign brand to data
+		data["brand"] = brand
+
+		// cari kategori detail dari product
+		cat, err := app.kategori.GetById(product.KategoriID)
+		if err != nil {
+			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			return
+		}
+
+		// assign category to data
+		data["kategori"] = cat
+
+		// return success and data
+		APISuccessResponse(http.StatusOK, "get detail product", data, c)
 	})
 
 	// ambil list product berdasarkan merek

@@ -27,6 +27,17 @@ func (k *KategoriAPI) GetAll() ([]*models.Kategori, error) {
 	return data, nil
 }
 
+func (k *KategoriAPI) GetById(id int) (*models.Kategori, error) {
+	var data *models.Kategori
+	q := k.DB.Table("kategori").Where("id = ?", id).First(data)
+
+	if q.Error != nil {
+		return nil, q.Error
+	}
+
+	return data, nil
+}
+
 // ------------------------------BRAND API----------------------------------------
 type BrandAPI struct {
 	DB *gorm.DB
@@ -40,6 +51,18 @@ func (b *BrandAPI) GetAll() ([]*models.Brand, error) {
 	data := []*models.Brand{}
 
 	q := b.DB.Table("brands").Find(&data)
+
+	if q.Error != nil {
+		return nil, q.Error
+	}
+
+	return data, nil
+}
+
+func (b *BrandAPI) GetById(id int) (*models.Brand, error) {
+	var data *models.Brand
+
+	q := b.DB.Table("brands").Where("id = ?", id).First(data)
 
 	if q.Error != nil {
 		return nil, q.Error
