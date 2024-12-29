@@ -135,6 +135,26 @@ func (app *App) RegisterRoutes() {
 		// assign product to data
 		data["product"] = product
 
+		// cari ukuran product
+		ukuran, err := app.product.GetUkuranProdukByID(id)
+		if err != nil {
+			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			return
+		}
+
+		// assign ukuran to map
+		data["ukuran"] = ukuran
+
+		// get list photos of product
+		photos, err := app.product.GetProductPhotosByID(id)
+		if err != nil {
+			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			return
+		}
+
+		// assign photos to map
+		data["photos"] = photos
+
 		// cari brand dari product tersebut
 		brand, err := app.brand.GetById(product.BrandID)
 		if err != nil {
