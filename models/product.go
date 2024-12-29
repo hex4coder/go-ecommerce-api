@@ -34,17 +34,15 @@ type Product struct {
 }
 
 type PhotoProducts struct {
-	Id       int     `json:"id"`
-	ProdukID int     `json:"produk_id"`
-	Foto     string  `json:"foto"`
-	Produk   Product `json:"produk,omitempty"`
+	Id       int    `json:"id"`
+	ProdukID int    `json:"produk_id"`
+	Foto     string `json:"foto"`
 	SoftDeleteTime
 }
 
 type UkuranProduks struct {
-	Id       int     `json:"id"`
-	ProdukID int     `json:"produk_id"`
-	Ukuran   string  `json:"ukuran"`
-	Produk   Product `json:"produk,omitempty"`
+	Id       int    `json:"id"`
+	ProdukID int    `json:"produk_id"`
+	Ukuran   string `json:"ukuran"`
 	SoftDeleteTime
 }
