@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hex4coder/go-ecommerce-api/models"
+	"github.com/joho/godotenv"
 )
 
 func TestGetKategori(t *testing.T) {
@@ -70,6 +71,13 @@ func TestGetKategori(t *testing.T) {
 }
 
 func TestDetailProduct(t *testing.T) {
+
+	// load env
+	err := godotenv.Load("../.env")
+	if err != nil {
+		panic("Error loading .env file")
+	}
+
 	// open database
 	db, err := models.ConnectDB()
 
