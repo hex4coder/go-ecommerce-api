@@ -7,7 +7,7 @@ import (
 
 type UserInterface interface {
 	GetUserById(id int) (models.User, error)
-	GetUserAddressById(id int) (models.Addresses, error)
+	GetUserAddressById(id int) (models.Address, error)
 }
 
 type AuthInterface interface {

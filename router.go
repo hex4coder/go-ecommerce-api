@@ -69,7 +69,30 @@ func (app *App) RegisterRoutes() {
 	})
 
 	// register function
-	app.router.POST("/register", func(c *gin.Context) {})
+	app.router.POST("/register", func(c *gin.Context) {
+		registerReq := new(controllers.RegisterRequest)
+
+		// request binding
+		if err := c.BindJSON(registerReq); err != nil {
+			APIErrorResponse(http.StatusBadRequest, err.Error(), c)
+			return
+		}
+
+		// validator
+		if err := cv.Validate(registerReq); err != nil {
+			APIErrorResponse(http.StatusBadRequest, err.Error(), c)
+			return
+		}
+
+		// create new user
+		if err := app.auth.Register(registerReq); err != nil {
+			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			return
+		}
+
+		// success
+		APISuccessResponse(http.StatusOK, "new user created", registerReq, c)
+	})
 
 	// ambil list kategori
 	app.router.GET("/categories", func(c *gin.Context) {

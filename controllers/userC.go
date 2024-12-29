@@ -53,17 +53,17 @@ func (u *UserAPI) GetUserById(id int) (models.User, error) {
 	return user, nil
 }
 
-func (u *UserAPI) GetUserAddressById(id int) (models.Addresses, error) {
+func (u *UserAPI) GetUserAddressById(id int) (models.Address, error) {
 
-	var address models.Addresses
+	var address models.Address
 
-	a := u.DB.Where(&models.Addresses{UserID: id}).Find(&address)
+	a := u.DB.Where(&models.Address{UserID: id}).Find(&address)
 	if a.Error != nil {
-		return models.Addresses{}, a.Error
+		return models.Address{}, a.Error
 	}
 
 	if a.RowsAffected < 1 {
-		return models.Addresses{}, fmt.Errorf("no address found with user id %d", id)
+		return models.Address{}, fmt.Errorf("no address found with user id %d", id)
 	}
 
 	return address, nil

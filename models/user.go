@@ -9,16 +9,16 @@ type SoftDeleteTime struct {
 }
 
 type User struct {
-	Id       int       `json:"id" gorm:"primary_key"`
-	Name     string    `json:"name"`
-	Email    string    `json:"email"`
-	Role     int       `json:"role"`
-	Password string    `json:"password"`
-	Address  Addresses `json:"address,omitempty" gorm:"foreignKey:user_id;references:id"`
+	Id       int     `json:"id" gorm:"primary_key"`
+	Name     string  `json:"name"`
+	Email    string  `json:"email"`
+	Role     int     `json:"role"`
+	Password string  `json:"password"`
+	Address  Address `json:"address,omitempty" gorm:"foreignKey:user_id;references:id"`
 	SoftDeleteTime
 }
 
-type Addresses struct {
+type Address struct {
 	Id        int    `json:"id,omitempty" gorm:"primary_key"`
 	UserID    int    `json:"user_id,omitempty"`
 	NomorHP   string `json:"nomorhp,omitempty"`

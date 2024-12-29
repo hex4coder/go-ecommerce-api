@@ -112,7 +112,22 @@ type LoginRequest struct {
 	Password string `json:"password" validate:"required"`
 }
 
-type RegisterRequest struct{}
+type RegisterRequest struct {
+	// biodata user
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+	Name     string `json:"name" validate:"required"`
+
+	// Alamat
+	KodePos   string `json:"kodepos" validate:"required"`
+	Provinsi  string `json:"provinsi" validate:"required"`
+	Kota      string `json:"kota" validate:"required"`
+	Kecamatan string `json:"kecamatan" validate:"required"`
+	Desa      string `json:"desa" validate:"required"`
+	Dusun     string `json:"dusun" validate:"required"`
+	Jalan     string `json:"jalan" validate:"required"`
+	NomorHP   string `json:"nomorhp" validate:"required"`
+}
 
 type AuthAPI struct {
 	DB  *gorm.DB
@@ -159,12 +174,68 @@ func (a *AuthAPI) Login(r *LoginRequest) (string, error) {
 
 	return token, nil
 }
+
 func (a *AuthAPI) Register(r *RegisterRequest) error {
+
+	// buat temporary
+	var emailCount int64
+
+	// validasi email
+	check := a.DB.Table("users").Where(&models.User{Email: r.Email}).Count(&emailCount)
+	if check.RowsAffected > 0 || emailCount > 0 {
+		return fmt.Errorf("email %s sudah terdaftar", r.Email)
+	}
+
+	// buat model baru
+	user := new(models.User)
+
+	// create password hash
+	hashed, err := a.HashPassword(r.Password)
+	if err != nil {
+		return fmt.Errorf("failed to hashing the password %s", err.Error())
+	}
+
+	// assign data to user
+	user.Email = r.Email
+	user.Name = r.Name
+	user.Password = hashed
+	user.Role = 1 // customer
+
+	// insert user to database
+	insert := a.DB.Table("users").Create(user)
+	if insert.Error != nil {
+		return fmt.Errorf("error create new user %s", insert.Error.Error())
+	}
+
+	// get user id
+	userId := user.Id
+
+	// create address model
+	address := new(models.Address)
+	address.UserID = userId
+	address.KodePos = r.KodePos
+	address.Provinsi = r.Provinsi
+	address.Kota = r.Kota
+	address.Kecamatan = r.Kecamatan
+	address.Desa = r.Desa
+	address.Dusun = r.Dusun
+	address.Jalan = r.Jalan
+	address.NomorHP = r.NomorHP
+
+	// insert address to database
+	insertAddr := a.DB.Table("addresses").Create(address)
+	if insertAddr.Error != nil {
+		return fmt.Errorf("error create new address user %s", insertAddr.Error.Error())
+	}
+
+	// no error
 	return nil
 }
+
 func (a *AuthAPI) Logout() error {
 	return nil
 }
+
 func (a *AuthAPI) HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
