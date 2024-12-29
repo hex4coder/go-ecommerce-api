@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+
 	"github.com/hex4coder/go-ecommerce-api/models"
 	"gorm.io/gorm"
 )
@@ -28,8 +30,10 @@ func (k *KategoriAPI) GetAll() ([]*models.Kategori, error) {
 }
 
 func (k *KategoriAPI) GetById(id int) (*models.Kategori, error) {
-	var data *models.Kategori
-	q := k.DB.Table("kategori").Where("id = ?", id).First(data)
+
+	data := new(models.Kategori)
+
+	q := k.DB.Table("kategori").Where(&models.Kategori{Id: id}).First(data)
 
 	if q.Error != nil {
 		return nil, q.Error
@@ -60,9 +64,11 @@ func (b *BrandAPI) GetAll() ([]*models.Brand, error) {
 }
 
 func (b *BrandAPI) GetById(id int) (*models.Brand, error) {
-	var data *models.Brand
+	data := new(models.Brand)
 
-	q := b.DB.Table("brands").Where("id = ?", id).First(data)
+	q := b.DB.Table("brands").Where(&models.Brand{
+		Id: id,
+	}).First(data)
 
 	if q.Error != nil {
 		return nil, q.Error
@@ -129,6 +135,10 @@ func (p *ProductAPI) GetDetailProduct(productID int) (*models.Product, error) {
 
 	if r.Error != nil {
 		return nil, r.Error
+	}
+
+	if r.RowsAffected < 1 {
+		return nil, fmt.Errorf("no product count with id %d", productID)
 	}
 
 	return data, nil

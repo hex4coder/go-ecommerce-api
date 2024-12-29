@@ -68,3 +68,55 @@ func TestGetKategori(t *testing.T) {
 	fmt.Println("Waktu kerja ", end)
 
 }
+
+func TestDetailProduct(t *testing.T) {
+	// open database
+	db, err := models.ConnectDB()
+
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	// api
+	b := NewBrandAPI(db)
+	k := NewKategoriAPI(db)
+	p := NewProductAPI(db)
+
+	id := 1
+	// buat temporary data
+	data := make(map[string]any)
+
+	// find products by categori id
+	product, err := p.GetDetailProduct(id)
+	if err != nil {
+		t.Fatalf("Error get detail product %v\n", err)
+		return
+	}
+
+	fmt.Println("Detail product", product)
+
+	// assign product to data
+	data["product"] = product
+
+	// cari brand dari product tersebut
+	brand, err := b.GetById(product.BrandID)
+	if err != nil {
+		t.Fatalf("Error get brand by id %v\n", err)
+		return
+	}
+
+	// assign brand to data
+	data["brand"] = brand
+
+	// cari kategori detail dari product
+	cat, err := k.GetById(product.KategoriID)
+	if err != nil {
+		t.Fatalf("Error get kategori by id %v\n", err)
+		return
+	}
+
+	// assign category to data
+	data["kategori"] = cat
+
+	fmt.Println("list data", data)
+}
