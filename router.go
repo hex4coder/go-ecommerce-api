@@ -17,8 +17,8 @@ func APIErrorResponse(statusCode int, message string, c *gin.Context) {
 	})
 }
 
-func APISuccessResponse(statusCode int, message string, data any, c *gin.Context) {
-	c.IndentedJSON(statusCode, map[string]any{
+func APISuccessResponse(message string, data any, c *gin.Context) {
+	c.IndentedJSON(http.StatusOK, map[string]any{
 		"message": message,
 		"status":  "success",
 		"data":    data,
@@ -31,7 +31,7 @@ func (app *App) RegisterRoutes() {
 
 	// ---------------------------------AUTH API------------------------------------------------
 	app.router.GET("/", func(c *gin.Context) {
-		APISuccessResponse(http.StatusOK, "we are online and ready", map[string]any{
+		APISuccessResponse("we are online and ready", map[string]any{
 			"programmed_by": "Ardan, S.Kom",
 			"design_by":     "Ardan, S.Kom",
 		}, c)
@@ -63,7 +63,7 @@ func (app *App) RegisterRoutes() {
 		c.SetCookie("jwt", jwt, int(time.Now().Add(app.auth.GetJWTConfig().ExpiredDuration).Unix()), "/", app.url, true, true)
 
 		// jwt account
-		APISuccessResponse(http.StatusOK, "login function", map[string]any{
+		APISuccessResponse("login function", map[string]any{
 			"jwt": jwt,
 		}, c)
 	})
@@ -91,7 +91,7 @@ func (app *App) RegisterRoutes() {
 		}
 
 		// success
-		APISuccessResponse(http.StatusOK, "new user created", registerReq, c)
+		APISuccessResponse("new user created", registerReq, c)
 	})
 
 	// ambil list kategori
@@ -103,7 +103,7 @@ func (app *App) RegisterRoutes() {
 			return
 		}
 
-		APISuccessResponse(http.StatusOK, "list kategori", data, c)
+		APISuccessResponse("list kategori", data, c)
 	})
 
 	// ambil list brand
@@ -115,7 +115,7 @@ func (app *App) RegisterRoutes() {
 			return
 		}
 
-		APISuccessResponse(http.StatusOK, "list brand", data, c)
+		APISuccessResponse("list brand", data, c)
 	})
 
 	// ambil list produk berdasarkan waktu terbaru
@@ -127,7 +127,7 @@ func (app *App) RegisterRoutes() {
 			return
 		}
 
-		APISuccessResponse(http.StatusOK, "list of products", data, c)
+		APISuccessResponse("list of products", data, c)
 	})
 
 	// get detail product by id
@@ -199,7 +199,7 @@ func (app *App) RegisterRoutes() {
 		data["kategori"] = cat
 
 		// return success and data
-		APISuccessResponse(http.StatusOK, "get detail product", data, c)
+		APISuccessResponse("get detail product", data, c)
 	})
 
 	// ambil list product berdasarkan merek
@@ -225,7 +225,7 @@ func (app *App) RegisterRoutes() {
 			return
 		}
 
-		APISuccessResponse(http.StatusOK, "list of products", data, c)
+		APISuccessResponse("list of products", data, c)
 	})
 
 	// ambil list products berdasarkan brand id
@@ -251,7 +251,7 @@ func (app *App) RegisterRoutes() {
 			return
 		}
 
-		APISuccessResponse(http.StatusOK, "list of products", data, c)
+		APISuccessResponse("list of products", data, c)
 	})
 
 	// ambil list foto dari produk
@@ -276,7 +276,7 @@ func (app *App) RegisterRoutes() {
 			return
 		}
 
-		APISuccessResponse(http.StatusOK, "list of photo products", data, c)
+		APISuccessResponse("list of photo products", data, c)
 	})
 
 	// ambil list ukuran dari produk
@@ -301,7 +301,7 @@ func (app *App) RegisterRoutes() {
 			return
 		}
 
-		APISuccessResponse(http.StatusOK, "list of photo products", data, c)
+		APISuccessResponse("list of photo products", data, c)
 	})
 
 	// get popular products
@@ -327,7 +327,7 @@ func (app *App) RegisterRoutes() {
 			return
 		}
 
-		APISuccessResponse(http.StatusOK, "list of popular products", data, c)
+		APISuccessResponse("list of popular products", data, c)
 	})
 
 	// ---------------------------------USERS-------------------------------
@@ -340,7 +340,7 @@ func (app *App) RegisterRoutes() {
 			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
 			return
 		}
-		APISuccessResponse(http.StatusOK, "logout", nil, c)
+		APISuccessResponse("logout", nil, c)
 	})
 
 	// get user by id
@@ -359,7 +359,7 @@ func (app *App) RegisterRoutes() {
 			return
 		}
 
-		APISuccessResponse(http.StatusOK, fmt.Sprintf("user with id %d", id), user, c)
+		APISuccessResponse(fmt.Sprintf("user with id %d", id), user, c)
 
 	})
 
@@ -380,7 +380,7 @@ func (app *App) RegisterRoutes() {
 			return
 		}
 
-		APISuccessResponse(http.StatusOK, fmt.Sprintf("address with user id %d", id), address, c)
+		APISuccessResponse(fmt.Sprintf("address with user id %d", id), address, c)
 	})
 
 }
