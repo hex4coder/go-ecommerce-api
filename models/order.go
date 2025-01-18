@@ -4,15 +4,23 @@ import "time"
 
 type Order struct {
 	Id               uint
-	UserId           uint
 	Tanggal          time.Time
-	TotalHargaBarang uint64
+	Status           string
+	AlasanPembatalan string
+	TotalHargaProduk uint64
 	TotalDiskon      uint
 	TotalBayar       uint64
-	Status           string
-	SudahTerbayar    bool
 	BuktiTransfer    string
+	SudahTerbayar    bool
+	CodePromo        string
+	UserId           uint
 
 	// soft deleted function
 	SoftDeleteTime
+}
+
+type DetailOrder struct {
+	Id uint
+	OrderId uint
+	ProductId uint
 }

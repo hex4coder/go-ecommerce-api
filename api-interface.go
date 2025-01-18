@@ -42,4 +42,11 @@ type ProductInterface interface {
 
 type OrderInterface interface {
 	GetMyOrders(int) ([]*models.Order, error)
+	GetDetailOrder(int) (*models.Order, []*models.DetailOrder, error)
+
+	CreateOrder(*controllers.OrderRequest) error
+	GetOrderStatus(int) (string, error)
+	CancelOrder(int) error
+
+	DeleteOrder(int) error
 }

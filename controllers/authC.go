@@ -181,8 +181,8 @@ func (a *AuthAPI) Register(r *RegisterRequest) error {
 	var emailCount int64
 
 	// validasi email
-	check := a.DB.Table("users").Where(&models.User{Email: r.Email}).Count(&emailCount)
-	if check.RowsAffected > 0 || emailCount > 0 {
+	a.DB.Table("users").Where(&models.User{Email: r.Email}).Count(&emailCount)
+	if emailCount > 0 {
 		return fmt.Errorf("email %s sudah terdaftar", r.Email)
 	}
 
