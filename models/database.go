@@ -29,7 +29,7 @@ func LoadDatabaseConfigFromEnv(parseTime bool) *DatabaseConfig {
 
 	dbhost := os.Getenv("DATABASE_HOST")
 	if len(dbhost) == 0 {
-		dbhost = "localhost"
+		dbhost = "172.28.208.1"
 	}
 
 	dbportstr := os.Getenv("DATABASE_PORT")
@@ -44,10 +44,13 @@ func LoadDatabaseConfigFromEnv(parseTime bool) *DatabaseConfig {
 
 	dbusername := os.Getenv("DATABASE_USERNAME")
 	if len(dbusername) == 0 {
-		dbusername = "root"
+		dbusername = "aaa"
 	}
 
 	dbpassword := os.Getenv("DATABASE_PASSWORD")
+	if len(dbpassword) == 0 {
+		dbpassword = "anu123"
+	}
 
 	return &DatabaseConfig{
 		ParseTime:    parseTime,
