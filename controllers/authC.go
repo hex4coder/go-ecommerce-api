@@ -119,14 +119,14 @@ type RegisterRequest struct {
 	Name     string `json:"name" validate:"required"`
 
 	// Alamat
-	KodePos   string `json:"kodepos" validate:"required"`
+	Kodepos   string `json:"kodepos" validate:"required"`
 	Provinsi  string `json:"provinsi" validate:"required"`
 	Kota      string `json:"kota" validate:"required"`
 	Kecamatan string `json:"kecamatan" validate:"required"`
 	Desa      string `json:"desa" validate:"required"`
 	Dusun     string `json:"dusun" validate:"required"`
 	Jalan     string `json:"jalan" validate:"required"`
-	NomorHP   string `json:"nomorhp" validate:"required"`
+	Nomorhp   string `json:"nomorhp" validate:"required"`
 }
 
 type AuthAPI struct {
@@ -213,14 +213,14 @@ func (a *AuthAPI) Register(r *RegisterRequest) error {
 	// create address model
 	address := new(models.Address)
 	address.UserID = userId
-	address.KodePos = r.KodePos
+	address.Kodepos = r.Kodepos
 	address.Provinsi = r.Provinsi
 	address.Kota = r.Kota
 	address.Kecamatan = r.Kecamatan
 	address.Desa = r.Desa
 	address.Dusun = r.Dusun
 	address.Jalan = r.Jalan
-	address.NomorHP = r.NomorHP
+	address.Nomorhp = r.Nomorhp
 
 	// insert address to database
 	insertAddr := a.DB.Table("addresses").Create(address)
