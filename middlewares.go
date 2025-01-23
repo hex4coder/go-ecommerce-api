@@ -14,18 +14,18 @@ func GetTokenFromCookiesOrBearer(c *gin.Context) (string, error) {
 
 	// get cookie from request
 	cookie, err := c.Cookie("jwt")
-	if err == http.ErrNoCookie {
-		// no cookie, perform header bearer token authorization
-		// get headers bearer token
-		tokenString := c.GetHeader("Authorization")
-
-		// get the token from the string Authorization: Bearer .....token.....
-		if tokenString != "" {
-			token = tokenString[len("Bearer "):]
-		}
-	} else {
+	if err != http.ErrNoCookie {
 		// set token to cookie
 		token = cookie
+	}
+
+	// no cookie, perform header bearer token authorization
+	// get headers bearer token
+	tokenString := c.GetHeader("Authorization")
+
+	// get the token from the string Authorization: Bearer .....token.....
+	if tokenString != "" {
+		token = tokenString[len("Bearer "):]
 	}
 
 	if token == "" {
