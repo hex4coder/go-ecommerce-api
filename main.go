@@ -21,6 +21,7 @@ type App struct {
 	brand    BrandInterface
 	product  ProductInterface
 	promo    PromoCodeInterface
+	order    OrderInterface
 
 	// app base
 	router *gin.Engine
@@ -36,6 +37,7 @@ func NewApp(db *gorm.DB, url string, router *gin.Engine) *App {
 		brand:    controllers.NewBrandAPI(db),
 		product:  controllers.NewProductAPI(db),
 		promo:    controllers.NewPromoCodeAPI(db),
+		order:    controllers.NewOrderAPI(db),
 
 		db:     db,
 		router: router,

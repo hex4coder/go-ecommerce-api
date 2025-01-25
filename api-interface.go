@@ -44,10 +44,11 @@ type OrderInterface interface {
 	GetMyOrders(int) ([]*models.Order, error)
 	GetDetailOrder(int) (*models.Order, []*models.DetailOrder, error)
 
-	CreateOrder(*controllers.OrderRequest) error
+	CreateOrder(*controllers.NewOrderRequest) error
 	GetOrderStatus(int) (string, error)
-	CancelOrder(int) error
 
+	// only if status is new (pending)
+	CancelOrder(*controllers.CancelOrderRequest) error
 	DeleteOrder(int) error
 }
 
