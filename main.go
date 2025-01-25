@@ -20,6 +20,7 @@ type App struct {
 	kategori KategoriInterface
 	brand    BrandInterface
 	product  ProductInterface
+	promo    PromoCodeInterface
 
 	// app base
 	router *gin.Engine
@@ -34,6 +35,7 @@ func NewApp(db *gorm.DB, url string, router *gin.Engine) *App {
 		kategori: controllers.NewKategoriAPI(db),
 		brand:    controllers.NewBrandAPI(db),
 		product:  controllers.NewProductAPI(db),
+		promo:    controllers.NewPromoCodeAPI(db),
 
 		db:     db,
 		router: router,

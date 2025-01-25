@@ -383,4 +383,32 @@ func (app *App) RegisterRoutes() {
 		APISuccessResponse(fmt.Sprintf("address with user id %d", id), address, c)
 	})
 
+	// promo code check
+	ar.GET("/check-promo/:code", func(c *gin.Context) {
+
+		// get code parameter
+		code := c.Param("code")
+
+		// if no data in code
+		if len(code) == 0 {
+			// error with no data
+			APIErrorResponse(http.StatusBadRequest, "no code is passed", c)
+			// return
+			return
+		}
+
+		// find the code
+		promo, err := app.promo.CheckPromo(code)
+
+		// check error
+		if err != nil {
+			// return with error
+			APIErrorResponse(http.StatusBadRequest, err.Error(), c)
+			return
+		}
+
+		// return data if success
+		APISuccessResponse(fmt.Sprintf("promo with code %s", code), promo, c)
+	})
+
 }

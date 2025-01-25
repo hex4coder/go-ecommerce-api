@@ -50,3 +50,7 @@ type OrderInterface interface {
 
 	DeleteOrder(int) error
 }
+
+type PromoCodeInterface interface {
+	CheckPromo(string) (*models.PromoCode, error)
+}
