@@ -258,7 +258,7 @@ func (o *OrderAPI) DeleteOrder(orderId int) error {
 				defer wg.Done()
 
 				// delete the order items
-				db.Table("detail_pesanan").Where("id = ?", detail.Id).Delete()
+				db.Table("detail_pesanan").Delete(&models.DetailOrder{Id: detail.Id})
 			}(wg, o.db, item)
 		}
 
@@ -267,7 +267,7 @@ func (o *OrderAPI) DeleteOrder(orderId int) error {
 	}
 
 	// 2. delete the orders
-	o.db.Table("pesanan").Where("id = ?", orderId).Delete()
+	o.db.Table("pesanan").Delete(&models.Order{Id: order.Id})
 
 	// success and no error
 	return nil
