@@ -20,6 +20,7 @@ type NewOrderRequest struct {
 	TotalHargaProduk uint64 `json:"total_harga_produk"`
 	TotalDiskon      uint   `json:"total_diskon"`
 	TotalBayar       uint64 `json:"total_bayar"`
+	BuktiTransfer    string `json:"bukti_transfer"`
 
 	// jumlah barang yang dibeli
 	Detail []OrderDetailRequest `json:"detail"`
@@ -31,10 +32,12 @@ type CancelOrderRequest struct {
 }
 
 type OrderDetailRequest struct {
-	ProductId uint `json:"product_id"`
-	Jumlah    uint `json:"jumlah"`
-	Harga     uint `json:"harga"`
-	Total     uint `json:"total"`
+	ProductId  uint   `json:"product_id"`
+	Jumlah     uint   `json:"jumlah"`
+	Harga      uint   `json:"harga"`
+	Total      uint   `json:"total"`
+	Ukuran     string `json:"ukuran"`
+	Keterangan string `json:"keterangan,omitempty"`
 }
 
 // create order api
@@ -123,10 +126,7 @@ func (o *OrderAPI) GetOrderStatus(orderId int) (string, error) {
 func (o *OrderAPI) CreateOrder(request *NewOrderRequest) error {
 
 	// create template order and detail items order
-	var (
-		order   *models.Order
-		details []*models.DetailOrder
-	)
+	order := new(models.Order)
 
 	// new order
 	order.Status = "baru"
@@ -134,12 +134,56 @@ func (o *OrderAPI) CreateOrder(request *NewOrderRequest) error {
 	order.AlasanPembatalan = ""
 	order.SudahTerbayar = false // default
 
+	// file bukti transfer
+	order.BuktiTransfer = request.BuktiTransfer
+
 	// fill order with data
 	order.UserId = request.UserId
 	order.CodePromo = request.CodePromo
 
-	//TODO: Create new order
-	//TODO: Store the uploaded file (bukti pembayaran)
+	// calculate the discount and the sum of products
+	order.TotalHargaProduk = request.TotalHargaProduk
+	order.TotalDiskon = request.TotalDiskon
+	order.TotalBayar = request.TotalBayar
+
+	//TODO: Create new order with new detail order
+	r := o.db.Table("pesanan").Create(order)
+
+	// check error
+	if r.Error != nil {
+		return r.Error
+	}
+
+	// get the inserted id from query
+	orderId := order.Id
+
+	// create async process with sync.WaitGroup
+	var wg *sync.WaitGroup
+	for _, item := range request.Detail {
+		wg.Add(1)
+
+		// convert item to models.DetailOrder
+		detail := &models.DetailOrder{
+			PesananId:  orderId,
+			ProdukId:   item.ProductId,
+			Jumlah:     item.Jumlah,
+			Harga:      uint64(item.Harga),
+			Total:      uint64(item.Total),
+			Keterangan: item.Keterangan,
+			Ukuran:     item.Ukuran,
+		}
+
+		// create go routine for inserting data to table
+		go func(db *gorm.DB, item *models.DetailOrder, wg *sync.WaitGroup) {
+			defer wg.Done()
+
+			// insert to database
+			db.Table("detail_pesanan").Create(item)
+		}(o.db, detail, wg)
+	}
+
+	// wait the process
+	wg.Wait()
 
 	// no error
 	return nil
@@ -235,7 +279,7 @@ func (o *OrderAPI) DeleteOrder(orderId int) error {
 	// delete the record
 	// 1. delete all the items or detail orders
 	// find the details
-	d := o.db.Table("detail_pesanan").Where("pesanan_id = ?", orderId).Find(details)
+	d := o.db.Table("detail_pesanan").Where("pesanan_id = ?", orderId).Find(&details)
 
 	// check error
 	if d.Error != nil {
@@ -267,7 +311,7 @@ func (o *OrderAPI) DeleteOrder(orderId int) error {
 	}
 
 	// 2. delete the orders
-	o.db.Table("pesanan").Delete(&models.Order{Id: order.Id})
+	o.db.Table("pesanan").Delete(&models.Order{Id: uint(orderId)})
 
 	// success and no error
 	return nil

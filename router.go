@@ -411,4 +411,56 @@ func (app *App) RegisterRoutes() {
 		APISuccessResponse(fmt.Sprintf("promo with code %s", code), promo, c)
 	})
 
+	// create new order
+	ar.POST("/order", func(c *gin.Context) {
+		//get user id
+		claims, e := c.Get("claims")
+		if !e {
+			APIErrorResponse(http.StatusInternalServerError, "failed to set context with claims", c)
+			return
+		}
+		cl := claims.(*controllers.MyClaims)
+		userId := cl.Id
+
+		// create temporary order request
+		newOrder := new(controllers.NewOrderRequest)
+		newOrder.UserId = uint(userId)
+
+		// binding data dari http request
+		if err := c.BindJSON(newOrder); err != nil {
+			APIErrorResponse(http.StatusBadRequest, err.Error(), c)
+			return
+		}
+
+		// file processing
+		file, err := c.FormFile("bukti_transfer")
+
+		// check error
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, err.Error(), c)
+			return
+		}
+
+		// no error, proccess the file
+		// baseFilePath := "/var/www/ecommercebalanipa/storage/public"
+		baseFilePath := "./"
+		if err := c.SaveUploadedFile(file, baseFilePath); err != nil {
+			// proccess the error
+			APIErrorResponse(http.StatusBadRequest, err.Error(), c)
+			return
+		}
+
+		// file upload success
+		newOrder.BuktiTransfer = file.Filename
+
+		// check error on create order
+		if orderErr := app.order.CreateOrder(newOrder); orderErr != nil {
+			APIErrorResponse(http.StatusInternalServerError, orderErr.Error(), c)
+			return
+		}
+
+		// success
+		APISuccessResponse("Pesanan anda telah dibuat.", newOrder, c)
+	})
+
 }
