@@ -3,6 +3,7 @@
 
 cp .env ../
 systemctl stop go-ecommerce-api
+git stash
 git pull
 go build
 cp ../.env .
