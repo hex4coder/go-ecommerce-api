@@ -202,6 +202,32 @@ func (app *App) RegisterRoutes() {
 		APISuccessResponse("get detail product", data, c)
 	})
 
+	// ambil list ukuran berdasarkan product id
+	app.router.GET("/ukuran/:id", func(c *gin.Context) {
+		idStr := c.Param("id")
+		if idStr == "" {
+			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("invalid product_id given %s", idStr), c)
+			return
+		}
+
+		// convert string to int
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("error conver id %s => %v", idStr, err), c)
+			return
+		}
+
+		// cari ukuran product
+		ukuran, err := app.product.GetUkuranProdukByID(id)
+		if err != nil {
+			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			return
+		}
+
+		// return data
+		APISuccessResponse(fmt.Sprintf("list ukuran product id : %d", id), ukuran, c)
+	})
+
 	// ambil list product berdasarkan merek
 	app.router.GET("/kategori/:id", func(c *gin.Context) {
 		idStr := c.Param("id")
@@ -270,31 +296,6 @@ func (app *App) RegisterRoutes() {
 		}
 
 		data, err := app.product.GetProductPhotosByID(id)
-
-		if err != nil {
-			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
-			return
-		}
-
-		APISuccessResponse("list of photo products", data, c)
-	})
-
-	// ambil list ukuran dari produk
-	app.router.GET("/ukuran/:id", func(c *gin.Context) {
-		idStr := c.Param("id")
-		if idStr == "" {
-			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("invalid produk_id given %s", idStr), c)
-			return
-		}
-
-		// convert string to int
-		id, err := strconv.Atoi(idStr)
-		if err != nil {
-			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("error conver id %s => %v", idStr, err), c)
-			return
-		}
-
-		data, err := app.product.GetUkuranProdukByID(id)
 
 		if err != nil {
 			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)

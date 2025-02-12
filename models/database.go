@@ -47,10 +47,8 @@ func LoadDatabaseConfigFromEnv(parseTime bool) *DatabaseConfig {
 		dbusername = "aaa"
 	}
 
-	dbpassword := os.Getenv("DATABASE_PASSWORD")
-	if len(dbpassword) == 0 {
-		dbpassword = "anu123"
-	}
+	dbpassword := ""
+	dbpassword = os.Getenv("DATABASE_PASSWORD")
 
 	return &DatabaseConfig{
 		ParseTime:    parseTime,
