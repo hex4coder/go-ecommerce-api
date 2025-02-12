@@ -19,7 +19,7 @@ type User struct {
 	Email    string  `json:"email"`
 	Role     int     `json:"role"`
 	Password string  `json:"password"`
-	Address  Address `json:"address,omitempty" gorm:"foreignKey:user_id;references:id"`
+	Address  Address `json:"address,omitempty"`
 	SoftDeleteTimeWithoutDeletedAt
 }
 
