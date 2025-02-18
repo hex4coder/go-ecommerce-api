@@ -29,7 +29,7 @@ func LoadDatabaseConfigFromEnv(parseTime bool) *DatabaseConfig {
 
 	dbhost := os.Getenv("DATABASE_HOST")
 	if len(dbhost) == 0 {
-		dbhost = "172.28.208.1"
+		dbhost = "localhost"
 	}
 
 	dbportstr := os.Getenv("DATABASE_PORT")

@@ -178,7 +178,22 @@ func (o *OrderAPI) CreateOrder(request *NewOrderRequest) error {
 			defer wg.Done()
 
 			// insert to database
-			db.Table("detail_pesanan").Create(item)
+			d := db.Table("detail_pesanan").Create(item)
+			if d.Error == nil {
+
+				// buat vars
+				produk := new(models.Product)
+
+				// kurangi stok produk dengan yang baru
+				r := db.Table("produk").Where("id = ?", item.ProdukId).First(produk)
+
+				if r.RowsAffected > 0 {
+					// update stock
+					db.Table("produk").Where("id = ?", item.ProdukId).Update("stok", produk.Stok-int(item.Jumlah))
+				}
+
+			}
+
 		}(o.db, detail, wg)
 	}
 
