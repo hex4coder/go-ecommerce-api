@@ -2,12 +2,17 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hex4coder/go-ecommerce-api/controllers"
+
+	"github.com/google/uuid"
+	"github.com/h2non/bimg"
 )
 
 func APIErrorResponse(statusCode int, message string, c *gin.Context) {
@@ -462,7 +467,7 @@ func (app *App) RegisterRoutes() {
 		}
 
 		// file processing
-		file, err := c.FormFile("bukti_transfer")
+		fileHeader, err := c.FormFile("bukti_transfer")
 
 		// check error
 		if err != nil {
@@ -470,17 +475,46 @@ func (app *App) RegisterRoutes() {
 			return
 		}
 
-		// no error, proccess the file
-		// baseFilePath := "/var/www/ecommercebalanipa/storage/public"
-		baseFilePath := "./"
-		if err := c.SaveUploadedFile(file, baseFilePath); err != nil {
-			// proccess the error
+		// read file to buffer
+		file, err := fileHeader.Open()
+		defer file.Close()
+		if err != nil {
 			APIErrorResponse(http.StatusBadRequest, err.Error(), c)
 			return
 		}
 
+		buffer, err := io.ReadAll(file)
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, err.Error(), c)
+			return
+		}
+
+		// no error, proccess the file
+		// baseFilePath := "/var/www/ecommercebalanipa/storage/public"
+		dirname := "../ecommercebalanipa/public/storage"
+
+		filename := strings.Replace(uuid.New().String(), "-", "", -1) + ".webp"
+
+		converted, err := bimg.NewImage(buffer).Convert(bimg.WEBP)
+		if err != nil {
+			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			return
+		}
+
+		processed, err := bimg.NewImage(converted).Process(bimg.Options{Quality: 50})
+		if err != nil {
+			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			return
+		}
+
+		writeError := bimg.Write(fmt.Sprintf(dirname+"/%s", filename), processed)
+		if writeError != nil {
+			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			return
+		}
+
 		// file upload success
-		newOrder.BuktiTransfer = file.Filename
+		newOrder.BuktiTransfer = filename
 
 		// check error on create order
 		if orderErr := app.order.CreateOrder(newOrder); orderErr != nil {

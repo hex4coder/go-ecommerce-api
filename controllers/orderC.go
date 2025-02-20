@@ -135,6 +135,7 @@ func (o *OrderAPI) CreateOrder(request *NewOrderRequest) error {
 	order.SudahTerbayar = false // default
 
 	// file bukti transfer
+	// terima file dari client
 	order.BuktiTransfer = request.BuktiTransfer
 
 	// fill order with data
