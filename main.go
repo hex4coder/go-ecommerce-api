@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -47,6 +48,23 @@ func NewApp(db *gorm.DB, url string, router *gin.Engine) *App {
 
 func (app *App) Run() {
 	port := 3000
+
+	// if custom port exists, point to it
+	strPort := os.Getenv("SERVER_PORT")
+
+	if len(strPort) >= 4 {
+		// point to it
+		newPort, err := strconv.Atoi(strPort)
+
+		// check error
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// set newPort
+		port = newPort
+	}
+
 	log.Printf("%s - [STARTED] - Server started at port %d\n", time.Now(), port)
 
 	err := app.router.Run(fmt.Sprintf(":%d", port))

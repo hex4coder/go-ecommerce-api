@@ -334,6 +334,31 @@ func (app *App) RegisterRoutes() {
 	// ---------------------------------USERS-------------------------------
 
 	ar := app.router.Group("/", AuthMiddleware(app))
+
+	// check user token
+	ar.GET("/check-token", func(c *gin.Context) {
+		claims, e := c.Get("claims")
+		if !e {
+			APIErrorResponse(http.StatusInternalServerError, "failed to set context with claims", c)
+			return
+		}
+
+		cl := claims.(*controllers.MyClaims)
+
+		if cl.Id < 1 {
+			// id not valid
+			APIErrorResponse(http.StatusUnauthorized, fmt.Sprintf("id tidak valid %d", cl.Id), c)
+			return
+		}
+
+		APISuccessResponse(fmt.Sprintf("id valid %d", cl.Id), map[string]any{
+			"id":    cl.Id,
+			"role":  cl.Role,
+			"email": cl.Email,
+		}, c)
+	})
+
+	// logout from app
 	ar.POST("/logout", func(c *gin.Context) {
 		c.SetCookie("jwt", "", 0, "/", app.url, true, true)
 		err := app.auth.Logout()
