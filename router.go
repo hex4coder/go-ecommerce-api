@@ -29,6 +29,9 @@ func (app *App) RegisterRoutes() {
 	// custom validators
 	cv := NewCustomValidator()
 
+	// static for images
+	app.router.Static("/images", "../ecommercebalanipa/public/storage")
+
 	// ---------------------------------AUTH API------------------------------------------------
 	app.router.GET("/", func(c *gin.Context) {
 		APISuccessResponse("we are online and ready", map[string]any{
