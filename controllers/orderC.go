@@ -11,19 +11,19 @@ import (
 
 type NewOrderRequest struct {
 	// user id
-	UserId uint `json:"user_id"`
+	UserId uint `json:"user_id" form:"user_id"`
 
 	// promo code
-	CodePromo string `json:"code_promo"`
+	CodePromo string `json:"code_promo" form:"code_promo"`
 
 	// order
-	TotalHargaProduk uint64 `json:"total_harga_produk"`
-	TotalDiskon      uint   `json:"total_diskon"`
-	TotalBayar       uint64 `json:"total_bayar"`
-	BuktiTransfer    string `json:"bukti_transfer"`
+	TotalHargaProduk uint64 `json:"total_harga_produk" form:"total_harga_produk"`
+	TotalDiskon      uint   `json:"total_diskon" form:"total_diskon"`
+	TotalBayar       uint64 `json:"total_bayar" form:"total_bayar"`
+	// BuktiTransfer    string `json:"bukti_transfer" form:"bukti_transfer"`
 
 	// jumlah barang yang dibeli
-	Detail []OrderDetailRequest `json:"detail"`
+	Detail []*OrderDetailRequest `json:"detail"`
 }
 
 type CancelOrderRequest struct {
@@ -32,12 +32,12 @@ type CancelOrderRequest struct {
 }
 
 type OrderDetailRequest struct {
-	ProductId  uint   `json:"product_id"`
-	Jumlah     uint   `json:"jumlah"`
-	Harga      uint   `json:"harga"`
-	Total      uint   `json:"total"`
-	Ukuran     string `json:"ukuran"`
-	Keterangan string `json:"keterangan,omitempty"`
+	ProductId  uint   `form:"product_id" json:"product_id"`
+	Jumlah     uint   `form:"jumlah" json:"jumlah"`
+	Harga      uint   `form:"harga" json:"harga"`
+	Total      uint   `form:"total" json:"total"`
+	Ukuran     string `form:"ukuran" json:"ukuran"`
+	Keterangan string `form:"keterangan" json:"keterangan,omitempty"`
 }
 
 // create order api
@@ -123,7 +123,7 @@ func (o *OrderAPI) GetOrderStatus(orderId int) (string, error) {
 	return order.Status, nil
 }
 
-func (o *OrderAPI) CreateOrder(request *NewOrderRequest) error {
+func (o *OrderAPI) CreateOrder(request *NewOrderRequest, filename string) error {
 
 	// create template order and detail items order
 	order := new(models.Order)
@@ -136,7 +136,7 @@ func (o *OrderAPI) CreateOrder(request *NewOrderRequest) error {
 
 	// file bukti transfer
 	// terima file dari client
-	order.BuktiTransfer = request.BuktiTransfer
+	order.BuktiTransfer = filename
 
 	// fill order with data
 	order.UserId = request.UserId
@@ -157,9 +157,10 @@ func (o *OrderAPI) CreateOrder(request *NewOrderRequest) error {
 
 	// get the inserted id from query
 	orderId := order.Id
+	fmt.Printf("BERHASIL MEMBUAT ORDERAN DENGAN ID : %d", orderId)
 
 	// create async process with sync.WaitGroup
-	var wg *sync.WaitGroup
+	var wg sync.WaitGroup
 	for _, item := range request.Detail {
 		wg.Add(1)
 
@@ -195,7 +196,7 @@ func (o *OrderAPI) CreateOrder(request *NewOrderRequest) error {
 
 			}
 
-		}(o.db, detail, wg)
+		}(o.db, detail, &wg)
 	}
 
 	// wait the process

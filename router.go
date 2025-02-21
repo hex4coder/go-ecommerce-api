@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -460,10 +461,77 @@ func (app *App) RegisterRoutes() {
 		newOrder := new(controllers.NewOrderRequest)
 		newOrder.UserId = uint(userId)
 
-		// binding data dari http request
-		if err := c.BindJSON(newOrder); err != nil {
-			APIErrorResponse(http.StatusBadRequest, err.Error(), c)
+		// fmt.Printf("%s", buf.String())
+		c.Request.ParseMultipartForm(100 * 1024 * 1024) // adjust form size 32MB
+		form, err := c.MultipartForm()
+
+		// check form error
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("error reading form value : %s", err), c)
 			return
+		}
+
+		// bind request to form
+		// total harga produk
+		totalHargaProdukStr := form.Value["total_harga_produk"][0]
+		totalHargaProduk, err := strconv.Atoi(totalHargaProdukStr)
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, "total harga produk invalid", c)
+			return
+		}
+		newOrder.TotalHargaProduk = uint64(totalHargaProduk)
+		// --------------------------------------------------------------------------
+
+		// total diskon
+		totalDiskonStr := form.Value["total_diskon"][0]
+		totalDiskon, err := strconv.Atoi(totalDiskonStr)
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, "total diskon invalid", c)
+			return
+		}
+		newOrder.TotalDiskon = uint(totalDiskon)
+		// --------------------------------------------------------------------------
+
+		// user id
+		userIdStr := form.Value["user_id"][0]
+		userIdInt, err := strconv.Atoi(userIdStr)
+		if err != nil {
+			APIErrorResponse(400, "user id invalid", c)
+			return
+		}
+		newOrder.UserId = uint(userIdInt)
+		// -------------------------------------------------------------------------
+
+		// total bayar
+		totalBayarStr := form.Value["total_bayar"][0]
+		totalBayar, err := strconv.Atoi(totalBayarStr)
+		if err != nil {
+			APIErrorResponse(400, "total bayar invalid", c)
+			return
+		}
+		newOrder.TotalBayar = uint64(totalBayar)
+		// --------------------------------------------------------------------------
+
+		// detail processing
+		details := []*controllers.OrderDetailRequest{}
+		detailStr := form.Value["detail"][0]
+		if len(detailStr) <= 0 {
+			APIErrorResponse(400, "detail order invalid", c)
+			return
+		}
+		// try JSON decoding
+		err = json.Unmarshal([]byte(detailStr), &details)
+		if err != nil {
+			APIErrorResponse(400, "failed to decoding details order", c)
+			return
+		}
+		newOrder.Detail = details
+		// -----------------------------------------------------------------------
+
+		fmt.Println("*****SUKSES**********")
+		fmt.Printf("%v", newOrder)
+		for _, v := range newOrder.Detail {
+			fmt.Printf("%v", v)
 		}
 
 		// file processing
@@ -477,11 +545,11 @@ func (app *App) RegisterRoutes() {
 
 		// read file to buffer
 		file, err := fileHeader.Open()
-		defer file.Close()
 		if err != nil {
 			APIErrorResponse(http.StatusBadRequest, err.Error(), c)
 			return
 		}
+		defer file.Close()
 
 		buffer, err := io.ReadAll(file)
 		if err != nil {
@@ -509,18 +577,18 @@ func (app *App) RegisterRoutes() {
 
 		writeError := bimg.Write(fmt.Sprintf(dirname+"/%s", filename), processed)
 		if writeError != nil {
-			APIErrorResponse(http.StatusInternalServerError, err.Error(), c)
+			APIErrorResponse(http.StatusInternalServerError, writeError.Error(), c)
 			return
 		}
 
 		// file upload success
-		newOrder.BuktiTransfer = filename
 
 		// check error on create order
-		if orderErr := app.order.CreateOrder(newOrder); orderErr != nil {
+		if orderErr := app.order.CreateOrder(newOrder, fmt.Sprintf("/%s", filename)); orderErr != nil {
 			APIErrorResponse(http.StatusInternalServerError, orderErr.Error(), c)
 			return
 		}
+		fmt.Printf("%v", newOrder.Detail)
 
 		// success
 		APISuccessResponse("Pesanan anda telah dibuat.", newOrder, c)
