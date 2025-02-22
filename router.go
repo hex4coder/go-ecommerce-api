@@ -594,4 +594,34 @@ func (app *App) RegisterRoutes() {
 		APISuccessResponse("Pesanan anda telah dibuat.", newOrder, c)
 	})
 
+
+
+	// -------------------------
+	// get my orders based on user id
+	ar.GET("/my-orders", func(c *gin.Context) {
+		//get user id
+		claims, e := c.Get("claims")
+		if !e {
+			APIErrorResponse(http.StatusInternalServerError, "failed to set context with claims", c)
+			return
+		}
+		cl := claims.(*controllers.MyClaims)
+		userId := cl.Id
+
+
+		fmt.Printf("Mencari orderan dengan user id %d", userId)
+
+		// get my orders
+		orders, errorOrders := app.order.GetMyOrders(userId)
+
+		// error check
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("error in get orders : %s", err), c)
+			return
+		}
+
+		// success
+		APISuccessResponse("Daftar pesanan anda", orders, c)
+	})
+
 }
