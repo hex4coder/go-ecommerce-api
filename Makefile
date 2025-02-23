@@ -7,5 +7,5 @@ run: build
 clean:
 	rm -rf bin/go-ecommerce-api
 
-test:
+tes:
 	go test -v ./...

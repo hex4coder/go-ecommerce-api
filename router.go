@@ -612,7 +612,7 @@ func (app *App) RegisterRoutes() {
 		fmt.Printf("Mencari orderan dengan user id %d", userId)
 
 		// get my orders
-		orders, errorOrders := app.order.GetMyOrders(userId)
+		orders, err := app.order.GetMyOrders(userId)
 
 		// error check
 		if err != nil {

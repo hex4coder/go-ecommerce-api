@@ -1,15 +1,16 @@
-package controllers
+package test
 
 import (
 	"fmt"
 	"testing"
 
+	"github.com/hex4coder/go-ecommerce-api/controllers"
 	"github.com/hex4coder/go-ecommerce-api/models"
 )
 
 func TestEmailCheck(t *testing.T) {
 
-	var r = new(RegisterRequest)
+	var r = new(controllers.RegisterRequest)
 	r.Email = "customer1@gmail.com"
 	r.Name = "Customer1"
 	r.Password = "12345678"
@@ -32,7 +33,7 @@ func TestEmailCheck(t *testing.T) {
 		t.Fatalf("ada kesalahan pada koneksi database %v", err)
 	}
 
-	a := NewAuthAPI(db)
+	a := controllers.NewAuthAPI(db)
 
 	// validasi email
 	a.DB.Table("users").Where(&models.User{Email: r.Email}).Count(&emailCount)
@@ -91,7 +92,7 @@ func TestPasswordHash(t *testing.T) {
 	hashedPassword := "$2y$12$lksGE6.lHRcG5BW3MNBu/eO7jRJxu8QcU6wRdGUkewvnEI9K28fw2"
 	password := "12345678"
 
-	api := NewAuthAPI(nil)
+	api := controllers.NewAuthAPI(nil)
 
 	if ok := api.CheckPassword(password, hashedPassword); !ok {
 		t.Fatal("password tidak valid")
@@ -100,7 +101,7 @@ func TestPasswordHash(t *testing.T) {
 
 func TestHashingPassword(t *testing.T) {
 	password := "12345678"
-	api := NewAuthAPI(nil)
+	api := controllers.NewAuthAPI(nil)
 
 	hashed, err := api.HashPassword(password)
 	if err != nil {

@@ -1,4 +1,4 @@
-package controllers
+package test
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hex4coder/go-ecommerce-api/controllers"
 	"github.com/hex4coder/go-ecommerce-api/models"
 	"github.com/joho/godotenv"
 )
@@ -34,7 +35,7 @@ func TestGetKategori(t *testing.T) {
 
 	go func(wg *sync.WaitGroup, ec chan error, dt chan []*models.Brand) {
 		defer wg.Done()
-		b := NewBrandAPI(db)
+		b := controllers.NewBrandAPI(db)
 		data, err := b.GetAll()
 		if err != nil {
 			ec <- err
@@ -44,7 +45,7 @@ func TestGetKategori(t *testing.T) {
 
 	go func(wg *sync.WaitGroup, ec chan error, dt chan []*models.Kategori) {
 		defer wg.Done()
-		b := NewKategoriAPI(db)
+		b := controllers.NewKategoriAPI(db)
 		data, err := b.GetAll()
 		if err != nil {
 			ec <- err
@@ -86,9 +87,9 @@ func TestDetailProduct(t *testing.T) {
 	}
 
 	// api
-	b := NewBrandAPI(db)
-	k := NewKategoriAPI(db)
-	p := NewProductAPI(db)
+	b := controllers.NewBrandAPI(db)
+	k := controllers.NewKategoriAPI(db)
+	p := controllers.NewProductAPI(db)
 
 	id := 1
 	// buat temporary data

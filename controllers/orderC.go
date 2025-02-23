@@ -58,7 +58,7 @@ func (o *OrderAPI) GetMyOrders(userId int) ([]*models.Order, error) {
 	orders := []*models.Order{}
 
 	// find the orders corresponding to user id
-	r := o.db.Table("pesanan").Where("user_id = ?", userId).Find(orders)
+	r := o.db.Table("pesanan").Where("user_id = ?", userId).Find(&orders)
 
 	// check if there is an error
 	if r.Error != nil {
