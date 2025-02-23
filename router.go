@@ -482,6 +482,10 @@ func (app *App) RegisterRoutes() {
 		newOrder.TotalHargaProduk = uint64(totalHargaProduk)
 		// --------------------------------------------------------------------------
 
+		// kode promo
+		kodePromo := form.Value["code_promo"][0]
+		newOrder.CodePromo = kodePromo
+
 		// total diskon
 		totalDiskonStr := form.Value["total_diskon"][0]
 		totalDiskon, err := strconv.Atoi(totalDiskonStr)
@@ -594,8 +598,6 @@ func (app *App) RegisterRoutes() {
 		APISuccessResponse("Pesanan anda telah dibuat.", newOrder, c)
 	})
 
-
-
 	// -------------------------
 	// get my orders based on user id
 	ar.GET("/my-orders", func(c *gin.Context) {
@@ -607,7 +609,6 @@ func (app *App) RegisterRoutes() {
 		}
 		cl := claims.(*controllers.MyClaims)
 		userId := cl.Id
-
 
 		fmt.Printf("Mencari orderan dengan user id %d", userId)
 
