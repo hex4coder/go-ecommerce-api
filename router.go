@@ -625,31 +625,46 @@ func (app *App) RegisterRoutes() {
 		APISuccessResponse("Daftar pesanan anda", orders, c)
 	})
 
+	// cancel my orders
+	ar.POST("/cancel-order", func(c *gin.Context) {
+		// cancel order request
+		cancelOrderReq := new(controllers.CancelOrderRequest)
 
+		// binding to body
+		if err := c.ShouldBindJSON(cancelOrderReq); err != nil {
+			APIErrorResponse(http.StatusBadRequest, "gagal parsing cancel order request", c)
+			return
+		}
 
+		// order data
+		err := app.order.CancelOrder(cancelOrderReq)
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("gagal membatalkan order : %s", err), c)
+			return
+		}
+		// success
+		APISuccessResponse("orderan berhasil dibatalkan", nil, c)
+	})
 
-  // cancel my orders
-  ar.POST("/cancel-order", func(c *gin.Context) {
-    
+	ar.POST("/delete-order", func(c *gin.Context) {
+		// mapping body to delete request
+		//
+		req := new(controllers.DeleteOrderRequest)
+		if err := c.BindJSON(req); err != nil {
+			APIErrorResponse(http.StatusBadRequest, "gagal bind request to json", c)
+			return
+		}
 
-    // cancel order request
-    cancelOrderReq := new(controllers.CancelOrderRequest)
+		// test delete order
+		err := app.order.DeleteOrder(req.OrderId)
 
-    // binding to body
-    if err := c.ShouldBindJSON(cancelOrderReq); err != nil {
-      APIErrorResponse(http.StatusBadRequest, "gagal parsing cancel order request", c)
-      return
-    }
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, "gagal bind request to json", c)
+			return
+		}
 
-   // order data
-    err := app.order.CancelOrder(cancelOrderReq)
-    if err != nil {
-      APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("gagal membatalkan order : %s", err), c)
-      return
-    }
-
-     // success
-     APISuccessResponse("orderan berhasil dibatalkan", nil, c)
-  })
+		// success
+		APISuccessResponse("order berhasil dihapus", nil, c)
+	})
 
 }

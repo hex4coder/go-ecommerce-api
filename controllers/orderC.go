@@ -40,6 +40,10 @@ type OrderDetailRequest struct {
 	Keterangan string `form:"keterangan" json:"keterangan,omitempty"`
 }
 
+type DeleteOrderRequest struct {
+	OrderId int `json:"order_id"`
+}
+
 // create order api
 type OrderAPI struct {
 	db *gorm.DB
@@ -291,6 +295,11 @@ func (o *OrderAPI) DeleteOrder(orderId int) error {
 	// if no record
 	if r.RowsAffected < 1 {
 		return fmt.Errorf("pesanan dengan id %d tidak ditemukan", orderId)
+	}
+
+	// jika status tidak sama dengan baru atau dibatalkan maka, kembalikan error
+	if order.Status != "baru" || order.Status != "dibatalkan" {
+		return fmt.Errorf("pesanan tidak bisa dihapus karena statusnya %s", order.Status)
 	}
 
 	// delete the record
