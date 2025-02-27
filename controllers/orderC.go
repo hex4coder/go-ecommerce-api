@@ -41,7 +41,11 @@ type OrderDetailRequest struct {
 }
 
 type DeleteOrderRequest struct {
-	OrderId int `json:"order_id"`
+	OrderId int `json:"order_id" validate:"required"`
+}
+
+type GetOrderStatusRequest struct {
+	OrderId int `json:"order_id" validate:"required"`
 }
 
 // create order api

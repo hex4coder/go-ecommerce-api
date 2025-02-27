@@ -655,9 +655,15 @@ func (app *App) RegisterRoutes() {
 			return
 		}
 
+		// validasi inputan
+		validator := NewCustomValidator()
+		err := validator.Validate(req)
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, "gagal validasi data", c)
+			return
+		}
 		// test delete order
-		err := app.order.DeleteOrder(req.OrderId)
-
+		err = app.order.DeleteOrder(req.OrderId)
 		if err != nil {
 			APIErrorResponse(http.StatusBadRequest, "gagal bind request to json", c)
 			return
@@ -667,4 +673,35 @@ func (app *App) RegisterRoutes() {
 		APISuccessResponse("order berhasil dihapus", nil, c)
 	})
 
+	// get order status
+	ar.POST("/get-order-status", func(c *gin.Context) {
+		// mapping request to get order status
+		req := new(controllers.GetOrderStatusRequest)
+
+		// mapping
+		if err := c.BindJSON(req); err != nil {
+			APIErrorResponse(http.StatusBadRequest, "gagal encode request", c)
+			return
+		}
+
+		// validasi inputan
+		validator := NewCustomValidator()
+		err := validator.Validate(req)
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, "gagal validasi data", c)
+			return
+		}
+
+		status, err := app.order.GetOrderStatus(req.OrderId)
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, "gagal validasi data", c)
+			return
+		}
+
+		// success
+		APISuccessResponse(fmt.Sprintf("status order dengan id %d", req.OrderId), map[string]any{
+			"status": status,
+		}, c)
+
+	})
 }
