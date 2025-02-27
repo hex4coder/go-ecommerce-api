@@ -314,13 +314,29 @@ func (o *OrderAPI) DeleteOrder(orderId int) error {
 			wg.Add(1)
 
 			// delete using concurrency
-			go func(wg *sync.WaitGroup, db *gorm.DB, detail *models.DetailOrder) {
+			go func(wg *sync.WaitGroup, db *gorm.DB, detail *models.DetailOrder, order *models.Order) {
 				// make sure its called
 				defer wg.Done()
 
+				// check order status
+				if order.Status == "baru" {
+					// kembalikan stok produk
+
+					// kembalikan stock dari produk yang dibeli
+					product := new(models.Product)
+
+					p := o.db.Table("produk").Where("id = ?", item.ProdukId).First(product)
+
+					// if no error and there is a product
+					if p.Error == nil && p.RowsAffected > 0 {
+						product.Stok = product.Stok + int(item.Jumlah)
+						o.db.Table("produk").Where("id = ?", item.ProdukId).Updates(product)
+					}
+				}
+
 				// delete the order items
 				db.Table("detail_pesanan").Delete(&models.DetailOrder{Id: detail.Id})
-			}(wg, o.db, item)
+			}(wg, o.db, item, order)
 		}
 
 		// wait until finish
