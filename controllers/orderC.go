@@ -156,7 +156,6 @@ func (o *OrderAPI) CreateOrder(request *NewOrderRequest, filename string) error 
 	order.TotalDiskon = request.TotalDiskon
 	order.TotalBayar = request.TotalBayar
 
-	//TODO: Create new order with new detail order
 	r := o.db.Table("pesanan").Create(order)
 
 	// check error
@@ -240,7 +239,7 @@ func (o *OrderAPI) CancelOrder(request *CancelOrderRequest) error {
 		details := []*models.DetailOrder{}
 
 		// find the details
-		d := o.db.Table("detail_pesanan").Where("pesanan_id = ?", request.Id).Find(details)
+		d := o.db.Table("detail_pesanan").Where("pesanan_id = ?", request.Id).Find(&details)
 
 		// if error
 		if d.Error != nil {
@@ -283,11 +282,8 @@ func (o *OrderAPI) CancelOrder(request *CancelOrderRequest) error {
 
 func (o *OrderAPI) DeleteOrder(orderId int) error {
 
-	// vars
-	var (
-		order   *models.Order
-		details []*models.DetailOrder
-	)
+	order := new(models.Order)
+	details := []*models.DetailOrder{}
 
 	// find the order
 	r := o.db.Table("pesanan").Where("id = ?", orderId).First(order)
