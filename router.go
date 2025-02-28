@@ -704,4 +704,41 @@ func (app *App) RegisterRoutes() {
 		}, c)
 
 	})
+
+	// details order
+	ar.POST("/detail-order", func(c *gin.Context) {
+
+		// mapping request to get order status
+		req := new(controllers.GetDetailOrderRequest)
+
+		// mapping
+		if err := c.BindJSON(req); err != nil {
+			APIErrorResponse(http.StatusBadRequest, "gagal encode request", c)
+			return
+		}
+
+		// validasi inputan
+		validator := NewCustomValidator()
+		err := validator.Validate(req)
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("gagal validasi data : %s", err), c)
+			return
+		}
+
+		order, details, err := app.order.GetDetailOrder(req.OrderId)
+
+		// check error
+		if err != nil {
+			APIErrorResponse(http.StatusBadRequest, fmt.Sprintf("gagal fetch detail order : %s", err), c)
+			return
+		}
+
+		// success return data
+		//
+		APISuccessResponse(fmt.Sprintf("detail order untuk id : %d", req.OrderId), map[string]any{
+			"details": details,
+			"order":   order,
+		}, c)
+
+	})
 }

@@ -48,6 +48,10 @@ type GetOrderStatusRequest struct {
 	OrderId int `json:"order_id" validate:"required"`
 }
 
+type GetDetailOrderRequest struct {
+	OrderId int `json:"order_id" validate:"required"`
+}
+
 // create order api
 type OrderAPI struct {
 	db *gorm.DB
@@ -79,11 +83,8 @@ func (o *OrderAPI) GetMyOrders(userId int) ([]*models.Order, error) {
 
 func (o *OrderAPI) GetDetailOrder(orderId int) (*models.Order, []*models.DetailOrder, error) {
 	// create the detail order and order vars
-	var (
-		order   *models.Order
-		details []*models.DetailOrder
-	)
-
+	order := new(models.Order)
+	details := []*models.DetailOrder{}
 	// find order with id
 	r := o.db.Table("pesanan").Where("id = ?", orderId).First(order)
 
@@ -98,9 +99,9 @@ func (o *OrderAPI) GetDetailOrder(orderId int) (*models.Order, []*models.DetailO
 	}
 
 	// order is found then, find the items order
-	d := o.db.Table("detail_pesanan").Where("pesanan_id = ?", orderId).Find(details)
-
+	d := o.db.Table("detail_pesanan").Where("pesanan_id = ?", orderId).Order("created_at DESC").Find(&details)
 	// check error
+
 	if d.Error != nil {
 		return nil, nil, d.Error
 	}
